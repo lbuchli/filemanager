@@ -3,10 +3,20 @@ package ch.lukas.filemanager.model;
 import java.io.FileNotFoundException;
 import java.net.URLConnection;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 
+/**
+ * Represents a single file in the file system.
+ * The file automatically determines a filetype based on the file name
+ * @author lukas
+ */
 public class File extends Node {
 
+	/**
+	 * Different file types
+	 * @author lukas
+	 */
     public enum FileType {
         TEXT, IMAGE, AUDIO, VIDEO, EXEC, PDF, OTHER
     }
@@ -24,11 +34,18 @@ public class File extends Node {
         type = determineType(path);
     }
 
+    /**
+     * Get the file type
+     * @return the type
+     */
     public FileType getType() {
         return type;
     }
     
-    private static FileType determineType(java.nio.file.Path path) throws FileNotFoundException {
+    @Override
+    public boolean isFolder() { return false; }
+    
+    private static FileType determineType(Path path) throws FileNotFoundException {
     	FileType result;
     	String mimeType = URLConnection.guessContentTypeFromName(path.toFile().getName());
         
@@ -61,6 +78,4 @@ public class File extends Node {
         
         return result;
     }
-    
-    public boolean isFolder() { return false; }
 }

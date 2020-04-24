@@ -8,10 +8,14 @@ import java.awt.event.ActionListener;
 import javax.swing.JList;
 
 import ch.lukas.filemanager.model.Folder;
-import ch.lukas.filemanager.model.Path;
+import ch.lukas.filemanager.model.CurrentPath;
 import ch.lukas.filemanager.model.PinnedFolders;
 import ch.lukas.filemanager.view.PinnedContextMenu;
 
+/**
+ * Controls the pinned folders at the left, reacting on both normal mouse presses and right clicks
+ * @author lukas
+ */
 public class PinnedController extends MouseAdapter implements ActionListener {
 	
 	PinnedContextMenu menu;
@@ -29,8 +33,8 @@ public class PinnedController extends MouseAdapter implements ActionListener {
 			int row = list.locationToIndex(e.getPoint());
 			if (list.isSelectedIndex(row)) {
 				Folder chosen = PinnedFolders.getInstance().getElementAt(row);
-				Path.getInstance().setCurrentFolder(chosen);
-				Path.getInstance().stopSearch();
+				CurrentPath.getInstance().setCurrentFolder(chosen);
+				CurrentPath.getInstance().stopSearch();
 			}
 		} else if (e.getButton() == 3) {
 			menu.show(e.getComponent(), e.getX(), e.getY());

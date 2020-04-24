@@ -9,7 +9,14 @@ import javax.swing.table.TableCellEditor;
 
 import ch.lukas.filemanager.model.Node;
 
+/**
+ * An editor to rename files in the JTable
+ * @author lukas
+ *
+ */
 public class FileRenameEditor extends AbstractCellEditor implements TableCellEditor {
+
+	private static final long serialVersionUID = -1963277631631165503L;
 	
 	JTextField editor = new JTextField();
 

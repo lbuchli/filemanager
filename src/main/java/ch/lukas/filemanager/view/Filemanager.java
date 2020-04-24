@@ -3,11 +3,15 @@ package ch.lukas.filemanager.view;
 import java.awt.BorderLayout;
 
 import javax.swing.JFrame;
-import javax.swing.UIManager;
-import javax.swing.UnsupportedLookAndFeelException;
 
+/**
+ * The filemanager window, consisting of navigation, pinned folders and the current folder children / search results
+ * @author lukas
+ */
 public class Filemanager extends JFrame {
 
+	private static final long serialVersionUID = 8649669646451354890L;
+	
 	private Pinned pinned;
     private FileList fileList;
     private Navigation navigation;

@@ -10,6 +10,10 @@ import javax.swing.ListCellRenderer;
 import ch.lukas.filemanager.model.Folder;
 import ch.lukas.filemanager.view.Icons;
 
+/**
+ * Render the pinned folders in the pinned JList
+ * @author lukas
+ */
 public class PinnedCellRenderer extends JLabel implements ListCellRenderer<Folder>  {
 
 	@Override

@@ -17,6 +17,10 @@ import ch.lukas.filemanager.model.File;
 import ch.lukas.filemanager.model.Node;
 import ch.lukas.filemanager.view.Icons;
 
+/**
+ * Render the nodes in the JTable file list
+ * @author lukas
+ */
 public class NodeCellRenderer implements TableCellRenderer {
 	
 	@Override

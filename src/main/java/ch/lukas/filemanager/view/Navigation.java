@@ -3,20 +3,22 @@ package ch.lukas.filemanager.view;
 import java.awt.BorderLayout;
 import java.awt.Color;
 
-import javax.swing.BorderFactory;
 import javax.swing.JButton;
 import javax.swing.JPanel;
-import javax.swing.JSeparator;
 import javax.swing.JTextField;
-import javax.swing.SwingConstants;
-import javax.swing.plaf.InsetsUIResource;
 
 import ch.lukas.filemanager.controller.NavButtonController;
 import ch.lukas.filemanager.controller.PathController;
 import ch.lukas.filemanager.controller.SearchController;
-import ch.lukas.filemanager.model.Path;
+import ch.lukas.filemanager.model.CurrentPath;
 
+/**
+ * The navigation consisting on back buttons, a path input field and a search input field.
+ * @author lukas
+ */
 public class Navigation extends JPanel {
+
+	private static final long serialVersionUID = -464801905099601604L;
 	
 	private JTextField path;
 	private JTextField search;
@@ -38,7 +40,7 @@ public class Navigation extends JPanel {
 		back.setBackground(Color.WHITE);
 		up.setBackground(Color.WHITE);
 		
-		path = new JTextField(Path.getInstance().toString(), 30);
+		path = new JTextField(CurrentPath.getInstance().toString(), 30);
 		add(path, BorderLayout.CENTER);
 		path.addActionListener(new PathController());
 		path.setToolTipText("Current Path");
@@ -48,8 +50,8 @@ public class Navigation extends JPanel {
 		search.addActionListener(new SearchController());
 		search.setToolTipText("Search");
 		
-		Path.getInstance().addPathChangeListener((String newPath) -> path.setText(newPath));
-    	Path.getInstance().addSearchStopListener(() -> search.setText(""));
+		CurrentPath.getInstance().addPathChangeListener((String newPath) -> path.setText(newPath));
+    	CurrentPath.getInstance().addSearchStopListener(() -> search.setText(""));
     	
     	setBackground(Color.WHITE);
 	}

@@ -12,10 +12,17 @@ import javax.swing.table.AbstractTableModel;
 import ch.lukas.filemanager.model.listeners.PathChangeListener;
 import ch.lukas.filemanager.model.listeners.SearchStopListener;
 
-public class Path extends AbstractTableModel implements Subscriber<Node> {
+/**
+ * A singleton where the current path resides. This class provides a table model which either shows the
+ * files in the current folder or search results.
+ * @author lukas
+ */
+public class CurrentPath extends AbstractTableModel implements Subscriber<Node> {
 
-    private static final String[] COLUMN_NAMES = new String[] {"Name", "Size", "Modified"};
-    private static Path instance;
+	private static final long serialVersionUID = 8117224923308976061L;
+	
+	private static final String[] COLUMN_NAMES = new String[] {"Name", "Size", "Modified"};
+    private static CurrentPath instance;
 
     private Folder currentFolder;
     private Folder previousFolder;
@@ -28,7 +35,7 @@ public class Path extends AbstractTableModel implements Subscriber<Node> {
     private boolean isSearching;
     private Vector<Node> searchResults;
    
-    private Path() {
+    private CurrentPath() {
         pathChangeListeners = new HashSet<PathChangeListener>();
         searchStopListeners = new HashSet<SearchStopListener>();
         
@@ -41,9 +48,13 @@ public class Path extends AbstractTableModel implements Subscriber<Node> {
         previousFolder = currentFolder;
     }
 
-    public static Path getInstance() {
+    /**
+     * Get the instance of this class
+     * @return the instance
+     */
+    public static CurrentPath getInstance() {
         if (instance == null) {
-            instance = new Path();
+            instance = new CurrentPath();
         }
 
         return instance;
@@ -54,17 +65,31 @@ public class Path extends AbstractTableModel implements Subscriber<Node> {
     	return currentFolder.getPath();
     }
     
+    /**
+     * Get the current folder
+     * @return current folder
+     */
     public Folder getCurrentFolder() {
     	return currentFolder;
     }
     
+    /**
+     * Sets the current folder, updating the view
+     * @param f the new folder
+     */
     public void setCurrentFolder(Folder f) {
     	previousFolder = currentFolder;
     	currentFolder = f;
+    	stopSearch();
     	fireUpdateData();
     }
     
+    /**
+     * Start a search
+     * @param text the text to search for
+     */
     public void startSearch(String text) {
+    	searchResults = new Vector<Node>();
     	isSearching = true;
     	
     	if (!currentFolder.isSubscriber(this)) {
@@ -74,6 +99,9 @@ public class Path extends AbstractTableModel implements Subscriber<Node> {
     	fireUpdateData();
     }
     
+    /**
+     * Cancel the search if one is currently active
+     */
     public void stopSearch() {
     	if (isSearching) {
         	isSearching = false;
@@ -83,34 +111,54 @@ public class Path extends AbstractTableModel implements Subscriber<Node> {
         	for (SearchStopListener listener : searchStopListeners) {
         		listener.onSearchStop();
         	}
-        	
-        	searchResults = new Vector<Node>();
     	}
     }
     
+    /**
+     * Check if currently searching
+     * @return true if searching
+     */
     public boolean isSearching() {
     	return isSearching;
     }
     
+    /**
+     * Get the node present at a row in the table
+     * @param row the number of the row to get the node 
+     * @return the node present there
+     */
     public Node getNodeAtRow(int row) {
     	return isSearching ? searchResults.get(row) : currentFolder.getChildren().get(row);
     }
     
+    /**
+     * Subscribe to path changes
+     * @param listener the subscriber/listener
+     */
     public void addPathChangeListener(PathChangeListener listener) {
     	pathChangeListeners.add(listener);
     }
 
+    /**
+     * Subscribe to search stops
+     * @param listener the subscriber/listener
+     */
 	public void addSearchStopListener(SearchStopListener listener) {
 		searchStopListeners.add(listener);
 	}
 	
+	/**
+	 * Request an edit for a specific cell. This request will be dismissed once edited
+	 * or in case of a data change.
+	 * @param row
+	 */
 	public void requestEdit(int row) {
 		requestedEdits.add(row);
 	}
 
     /**
      * Set the current path
-     * @param path The new path 
+     * @param path the new path 
      * @return 'true' if path was valid and is set
      */
     public boolean setPath(String path) {
@@ -126,12 +174,16 @@ public class Path extends AbstractTableModel implements Subscriber<Node> {
     
     /**
      * Construct a folder path from a string
-     * @param path
-     * @return the path (cannot be null)
+     * @param path the path, formatted as a string
+     * @return the folder present there
      * @throws FileNotFoundException 
      */
     public static Folder constructPath(String path) throws FileNotFoundException {
     	String[] folders = path.split("[\\/]");
+    	if (folders.length < 1) {
+    		throw new FileNotFoundException();
+    	}
+    	
     	Folder current = new Folder(null, folders[0]);
         
         for (int i = 1; i < folders.length; i++) {
@@ -184,19 +236,10 @@ public class Path extends AbstractTableModel implements Subscriber<Node> {
 		fireUpdateData();
 	}
 	
-	private void firePathChangeEvent() {
-		String newPath = currentFolder.getPath();
-		for (PathChangeListener listener : pathChangeListeners) {
-			listener.onChange(newPath);
-		}
-	}
-	
-	private void fireUpdateData() {
-        fireTableDataChanged();
-        firePathChangeEvent();
-        requestedEdits.clear();
-	}
-
+	/**
+	 * Get the previous folder
+	 * @return the previous folder or the current one if there is none.
+	 */
 	public Folder getPreviousFolder() {
 		return previousFolder;
 	}
@@ -218,4 +261,17 @@ public class Path extends AbstractTableModel implements Subscriber<Node> {
 
 	@Override
 	public void onSubscribe(Subscription sub) {}
+	
+	private void firePathChangeEvent() {
+		String newPath = currentFolder.getPath();
+		for (PathChangeListener listener : pathChangeListeners) {
+			listener.onChange(newPath);
+		}
+	}
+	
+	private void fireUpdateData() {
+        fireTableDataChanged();
+        firePathChangeEvent();
+        requestedEdits.clear();
+	}
 }

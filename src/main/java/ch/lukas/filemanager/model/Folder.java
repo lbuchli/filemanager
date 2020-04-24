@@ -2,21 +2,26 @@ package ch.lukas.filemanager.model;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.nio.file.FileVisitOption;
-import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.io.UncheckedIOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.Vector;
 import java.util.concurrent.Flow.Publisher;
 import java.util.concurrent.Flow.Subscriber;
 
+/**
+ * Represents a single folder in the file system. A folder contains children Nodes and can search for things
+ * with this folder as the root of the search.
+ * @author lukas
+ */
 public class Folder extends Node implements Publisher<Node> {
 
     private Vector<Node> children;
     private Set<Subscriber<? super Node>> searchSubscribers;
-    private java.nio.file.Path path;
+    private Path path;
     private Thread searchThread;
    
     public Folder(Folder parent, String name) throws FileNotFoundException {
@@ -30,6 +35,12 @@ public class Folder extends Node implements Publisher<Node> {
         }
     }
 
+    /**
+     * Get a child by name
+     * @param name the name
+     * @return the file if one exists
+     * @throws FileNotFoundException
+     */
     public Node getChild(String name) throws FileNotFoundException {
         for (Node n : getChildren()) {
         	if (n.getName().equals(name)) {
@@ -39,6 +50,10 @@ public class Folder extends Node implements Publisher<Node> {
         throw new FileNotFoundException();
     }
     
+    /**
+     * Start a search
+     * @param text the text to search for
+     */
     public void searchFor(String text) {
     	searchThread = new Thread(() -> {
     		try {
@@ -51,35 +66,20 @@ public class Folder extends Node implements Publisher<Node> {
     	searchThread.start();
     }
     
-    private Node pathToNode(java.nio.file.Path p) {
-    	Folder parent;
-		try {
-			parent = Path.constructPath(p.getParent().toString());
-		} catch (FileNotFoundException e) {
-			throw new RuntimeException(e.getMessage(), e.getCause());
-		}
-		String name = p.getFileName().toString();
-		try {
-			return p.toFile().isDirectory() 
-				? new Folder(parent, name) 
-				: new File(parent, name);
-		} catch (FileNotFoundException e) {
-			throw new RuntimeException(e.getMessage(), e.getCause());
-		} 
-    }
-    
-    private void notifySubscribers(Node node) {
-    	for (Subscriber<? super Node> sub : searchSubscribers) {
-    		sub.onNext(node);
-    	}
-    }
-    
+   
+    /**
+     * Stop the current search if it exists.
+     */
     public void cancelSearch() {
     	if (searchThread != null) {
         	searchThread.interrupt();
     	}
     }
 
+    /**
+     * Get the children nodes of this folder
+     * @return the children nodes
+     */
     public Vector<Node> getChildren() {
     	if (children == null) {
     		children = new Vector<Node>();
@@ -105,11 +105,15 @@ public class Folder extends Node implements Publisher<Node> {
     	return children;
     }
     
-    public void updateChildren() {
+    /**
+     * Update the children index (e.g. when having renamed a file)
+     */
+    protected void updateChildren() {
     	children = null;
     	getChildren();
     }
 
+    @Override
     public boolean isFolder() { return true; }
 
 	@Override
@@ -117,7 +121,36 @@ public class Folder extends Node implements Publisher<Node> {
 		searchSubscribers.add(sub);
 	}
 	
+	/**
+	 * Check if someone is a search subscriber	
+	 * @param sub the subscriber
+	 * @return true if it is a subscriber
+	 */
 	public boolean isSubscriber(Subscriber<? super Node> sub) {
 		return searchSubscribers.contains(sub);
 	}
+	
+	private Node pathToNode(Path p) {
+	    Folder parent;
+		try {
+			parent = CurrentPath.constructPath(p.getParent().toString());
+		} catch (FileNotFoundException e) {
+			throw new RuntimeException(e.getMessage(), e.getCause());
+		}
+		String name = p.getFileName().toString();
+		try {
+			return p.toFile().isDirectory() 
+				? new Folder(parent, name) 
+				: new File(parent, name);
+		} catch (FileNotFoundException e) {
+			throw new RuntimeException(e.getMessage(), e.getCause());
+		} 
+    }
+	    
+    private void notifySubscribers(Node node) {
+    	for (Subscriber<? super Node> sub : searchSubscribers) {
+    		sub.onNext(node);
+    	}
+    }
+	    
 }
