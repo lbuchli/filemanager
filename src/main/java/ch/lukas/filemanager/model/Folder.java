@@ -98,7 +98,8 @@ public class Folder extends Node implements Publisher<Node> {
     			if (file.isDirectory()) {
     				try {
     					// A hack because listRoots can't be bothered to return actual file names
-        				String name = getParent() == null ? file.getCanonicalPath().replace("\\", "") : file.getName();
+        				String name = getParent() == null && separator.equals("\\") ?
+        						file.getCanonicalPath().replace("\\", "") : file.getName();
         				
 						children.add(new Folder(this, name));
 					} catch (IOException e) {} // ignore inacessible files
