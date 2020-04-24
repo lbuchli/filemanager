@@ -179,7 +179,7 @@ public class CurrentPath extends AbstractTableModel implements Subscriber<Node> 
      * @throws FileNotFoundException 
      */
     public static Folder constructPath(String path) throws FileNotFoundException {
-    	String[] folders = path.split("[\\/]");
+    	String[] folders = path.split("[\\\\/]");
     	if (folders.length < 1) {
     		throw new FileNotFoundException();
     	}

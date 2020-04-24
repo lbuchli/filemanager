@@ -1,6 +1,7 @@
 package ch.lukas.filemanager.view;
 
 import java.awt.BorderLayout;
+import java.awt.Dimension;
 
 import javax.swing.JFrame;
 
@@ -36,6 +37,6 @@ public class Filemanager extends JFrame {
          
          setVisible(true);
          setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-         pack();
+         setMinimumSize(new Dimension(600, 512));
     }
 }

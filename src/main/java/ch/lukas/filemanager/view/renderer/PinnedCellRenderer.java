@@ -25,7 +25,12 @@ public class PinnedCellRenderer extends JLabel implements ListCellRenderer<Folde
 			boolean hasFocus
 			) {
 		
-		JLabel result = new JLabel(folder.getName(), Icons.getImageIcon(Icons.FOLDER), JLabel.LEFT);
+		String name = folder.getName();
+		if (name.length() >= 14) {
+			name = name.substring(0, 11) + "...";
+		}
+		
+		JLabel result = new JLabel(name, Icons.getImageIcon(Icons.FOLDER), JLabel.LEFT);
 		if (hasFocus || isSelected) {
 			result.setBackground(Color.LIGHT_GRAY);
 		}

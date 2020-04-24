@@ -58,7 +58,11 @@ public class Folder extends Node implements Publisher<Node> {
     	searchThread = new Thread(() -> {
     		try {
 				Files.walk(path)
-					.filter(p -> p.getFileName().toString().contains(text))
+					.filter(p -> {
+						Path name = p.getFileName();
+						if (name == null) return false;
+						return name.toString().contains(text);
+						})
 					.map(this::pathToNode)
 					.forEach(this::notifySubscribers);
 			} catch (IOException | UncheckedIOException e) {}
@@ -83,21 +87,25 @@ public class Folder extends Node implements Publisher<Node> {
     public Vector<Node> getChildren() {
     	if (children == null) {
     		children = new Vector<Node>();
-    		java.io.File[] files = new java.io.File(getPath()).listFiles();
+    		java.io.File[] files;
+    		if (getParent() == null && getName().isEmpty() && separator.equals("\\")) {
+    			files = java.io.File.listRoots();
+    		} else {
+        		files = new java.io.File(getPath()).listFiles();
+    		}
     		
     		for (java.io.File file : files) {
     			if (file.isDirectory()) {
     				try {
-						children.add(new Folder(this, file.getName()));
-					} catch (FileNotFoundException e) {
-						throw new RuntimeException(e.getMessage(), e.getCause());
-					}
+    					// A hack because listRoots can't be bothered to return actual file names
+        				String name = getParent() == null ? file.getCanonicalPath().replace("\\", "") : file.getName();
+        				
+						children.add(new Folder(this, name));
+					} catch (IOException e) {} // ignore inacessible files
     			} else {
     				try {
 						children.add(new File(this, file.getName()));
-					} catch (FileNotFoundException e) {
-						throw new RuntimeException(e.getMessage(), e.getCause());
-					}
+					} catch (FileNotFoundException e) {} // ignore inacessible files
     			}
     		}
     	}
