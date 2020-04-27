@@ -16,6 +16,7 @@ public abstract class Node {
     public Node(Folder parent, String name) {
     	separator = System.getProperty("file.separator");
     	
+    	/*
     	// on windows, add an empty parent folder that'll list the drives
     	if (parent == null && !name.isEmpty() && separator.equals("\\")) {
     		try {
@@ -24,6 +25,7 @@ public abstract class Node {
 				throw new RuntimeException(e.getMessage(), e.getCause());
 			}
     	}
+    	*/
     	
         this.name = name;
         this.parent = parent;
@@ -35,14 +37,14 @@ public abstract class Node {
      */
     public String getPath() {
     	if (separator.equals("\\")) { // on  windows
-    		if (getParent() == null) {
+    		if (name.isEmpty() || getParent() == null) {
         		return name.isEmpty() ? "" : name + separator;
         	} else {
         		String pPath = getParent().getPath();
         		return pPath + getName() + (isFolder() ? separator : "");
         	}
     	} else { // assume unix
-    		if (getParent() == null) {
+    		if (name.isEmpty() || getParent() == null) {
         		return "/";
         	} else {
         		String pPath = getParent().getPath();
@@ -78,6 +80,13 @@ public abstract class Node {
      * @return the parent  folder
      */
     public Folder getParent() {
+    	if (parent == null) {
+    		try {
+				return new Folder(null, "");
+			} catch (FileNotFoundException e) {
+				throw new RuntimeException(e.getMessage(), e.getCause());
+			}
+    	}
     	return parent;
     }
     
