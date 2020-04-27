@@ -6,7 +6,9 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.text.CharacterIterator;
 import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.text.StringCharacterIterator;
+import java.util.Date;
 
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
@@ -53,7 +55,8 @@ public class NodeCellRenderer implements TableCellRenderer {
 			break;
 		case 2: 
 			try {
-				result = new JLabel(DateFormat.getInstance().format(Files.getLastModifiedTime(path).toMillis()));
+				Date modified = Date.from(Files.getLastModifiedTime(path).toInstant());
+				result = new JLabel(new SimpleDateFormat("hh:mm dd.MM.yyyy  ").format(modified), JLabel.RIGHT);
 			} catch (IOException e) {
 				result = new JLabel("ERROR: Could not read modified time");
 			}
