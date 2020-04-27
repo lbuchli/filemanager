@@ -88,7 +88,7 @@ public class Folder extends Node implements Publisher<Node> {
     	if (children == null) {
     		children = new Vector<Node>();
     		java.io.File[] files;
-    		if (getParent() == null && getName().isEmpty() && separator.equals("\\")) {
+    		if (getName().isEmpty() && separator.equals("\\")) {
     			files = java.io.File.listRoots();
     		} else {
         		files = new java.io.File(getPath()).listFiles();

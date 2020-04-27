@@ -78,10 +78,12 @@ public class CurrentPath extends AbstractTableModel implements Subscriber<Node> 
      * @param f the new folder
      */
     public void setCurrentFolder(Folder f) {
-    	previousFolder = currentFolder;
-    	currentFolder = f;
-    	stopSearch();
-    	fireUpdateData();
+    	if (f != null) {
+        	previousFolder = currentFolder;
+        	currentFolder = f;
+        	stopSearch();
+        	fireUpdateData();
+    	}
     }
     
     /**
